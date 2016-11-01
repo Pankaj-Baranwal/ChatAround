@@ -90,8 +90,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        facebookSDKInitialize();
+
         setContentView(R.layout.activity_login);
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -158,7 +159,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             break;
                     }
                 }
-            });             }
+            });
+        }
     }
 
     private void init(){
@@ -207,6 +209,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     else {
                         rl_progress.setVisibility(View.VISIBLE);
                         registerUser();
+                        registerUserDBMS();
                     }
                 }
             });
@@ -219,15 +222,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 finish();
             }
         });
-//        fb_signin = (LoginButton) findViewById(R.id.fb_signin);
-//        fb_signin.setLoginBehavior(LoginBehavior.WEB_ONLY);
-//        fb_signin.setReadPermissions(Arrays.asList("public_profile", "email"));
-//        fb_signin.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                getLoginDetails(fb_signin);
-//            }
-//        });
     }
 
     private void signIn() {
@@ -301,6 +295,55 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     void registerUser(){
+        StringRequest myReq = new StringRequest(Request.Method.POST,
+                "http://52.66.45.251/AuthenticateUser",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            rl_progress.setVisibility(View.GONE);
+                            JSONObject jO = new JSONObject(response);
+                            if (jO.getString("Status").contentEquals("200")){
+                                SharedPreferences.Editor editor = sp.edit();
+                                editor.putString("uid", jO.getString("UserId"));
+                                if (jO.getString("ProfileFlag").contentEquals("1")) {
+                                    editor.putString("edited", "1");
+                                    editor.apply();
+                                    receiveData();
+                                }
+                                rl_progress.setVisibility(View.GONE);
+                            }else if(jO.getString("Status").contentEquals("404")){
+                                rl_progress.setVisibility(View.GONE);
+                                Toast.makeText(LoginActivity.this, "Null Entries Sent", Toast.LENGTH_SHORT).show();
+                            }else{
+                                rl_progress.setVisibility(View.GONE);
+                                Toast.makeText(LoginActivity.this, "User doesn't exists!", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            rl_progress.setVisibility(View.GONE);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        rl_progress.setVisibility(View.GONE);
+                        Toast.makeText(LoginActivity.this, "Something went wrong", Toast.LENGTH_SHORT).show();
+                    }
+                }) {
+            protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Email", email.replace(" ", "%20"));
+                params.put("Password", password.replace(" ", "%20"));
+                return params;
+            }
+        };
+        myReq.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(myReq);
+    }
+
+    void registerUserDBMS(){
         StringRequest myReq = new StringRequest(Request.Method.POST,
                 "http://52.66.45.251/AuthenticateUser",
                 new Response.Listener<String>() {

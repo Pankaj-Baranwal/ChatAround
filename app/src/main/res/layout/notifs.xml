@@ -11,35 +11,6 @@
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="6dp"
         >
-        <!--<RelativeLayout-->
-        <!--android:id="@+id/image_user_rl"-->
-        <!--android:layout_width="50dp"-->
-        <!--android:layout_height="50dp"-->
-        <!--android:layout_alignParentLeft="true"-->
-        <!--android:layout_margin="4dp"-->
-        <!--&gt;-->
-        <!--<de.hdodenhof.circleimageview.CircleImageView-->
-        <!--android:id="@+id/image_user_bound"-->
-        <!--android:layout_width="45dp"-->
-        <!--android:layout_height="45dp"-->
-        <!--android:src="#202020"-->
-        <!--android:layout_centerInParent="true"-->
-        <!--/>-->
-        <!--<de.hdodenhof.circleimageview.CircleImageView-->
-        <!--android:id="@+id/image_user_boundary"-->
-        <!--android:layout_width="44dp"-->
-        <!--android:layout_height="44dp"-->
-        <!--android:src="#ffffff"-->
-        <!--android:layout_centerInParent="true"-->
-        <!--/>-->
-        <!--<de.hdodenhof.circleimageview.CircleImageView-->
-        <!--android:id="@+id/image_user_post"-->
-        <!--android:layout_width="40dp"-->
-        <!--android:layout_height="40dp"-->
-        <!--android:src="@mipmap/ic_launcher"-->
-        <!--android:layout_centerInParent="true"-->
-        <!--/>-->
-        <!--</RelativeLayout>-->
         <LinearLayout
             android:id="@+id/ll_text_post"
             android:orientation="vertical"

@@ -157,4 +157,9 @@ public class DBHandler extends SQLiteOpenHelper {
         cursor.close();
         return chatTables;
     }
+
+    public List<ChatTable> search(String search_string){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String getQuery = "SELECT * FROM " + TABLE_CHAT + "WHERE " + search_string + " IN " + MESSAGE;
+    }
 }
