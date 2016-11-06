@@ -29,7 +29,7 @@ public class DBHandler extends SQLiteOpenHelper {
     private static final String NLike = "nlike";
     private static final String NComment = "ncomment";
 
-    public DBHandler(Context context){
+    public DBHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -52,7 +52,7 @@ public class DBHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void addChat(ChatTable chatTable){
+    public void addChat(ChatTable chatTable) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(STATUS, chatTable.getStatus());
@@ -66,7 +66,7 @@ public class DBHandler extends SQLiteOpenHelper {
         db.insert(TABLE_CHAT, null, values);
     }
 
-    public void addNotif(NotifTable table){
+    public void addNotif(NotifTable table) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(POST_ID, table.getPost_Id());
@@ -76,12 +76,12 @@ public class DBHandler extends SQLiteOpenHelper {
         db.insert(TABLE_NOTIF, null, values);
     }
 
-    public List<NotifTable> getNotifs(){
+    public List<NotifTable> getNotifs() {
         SQLiteDatabase db = this.getReadableDatabase();
         String getQuery = "SELECT * FROM " + TABLE_NOTIF;
         Cursor cursor = db.rawQuery(getQuery, null);
         List<NotifTable> notifTable = new ArrayList<>();
-        if (cursor!= null) {
+        if (cursor != null) {
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
                 notifTable.add(new NotifTable(cursor.getString(1), cursor.getInt(3), cursor.getInt(2)));
@@ -93,12 +93,12 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
 
-    public List<ChatTable> getChat(String post_id, String person_id){
+    public List<ChatTable> getChat(String post_id, String person_id) {
         SQLiteDatabase db = this.getReadableDatabase();
         String getQuery = "SELECT * FROM " + TABLE_CHAT + " WHERE " + POST_ID + " = ? AND " + REMOTE_ID + " = ?";
         Cursor cursor = db.rawQuery(getQuery, new String[]{post_id, person_id});
         List<ChatTable> chatTables = new ArrayList<>();
-        if (cursor!= null) {
+        if (cursor != null) {
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
                 chatTables.add(new ChatTable(cursor.getInt(1), cursor.getString(2), cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getString(7)));
@@ -109,7 +109,7 @@ public class DBHandler extends SQLiteOpenHelper {
         return chatTables;
     }
 
-    public int getChatCount(String post_id, String person_id){
+    public int getChatCount(String post_id, String person_id) {
         String countQuery = "SELECT * FROM " + TABLE_CHAT + " WHERE " + POST_ID + " = ? AND " + REMOTE_ID + " = ?";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, new String[]{post_id, person_id});
@@ -117,23 +117,23 @@ public class DBHandler extends SQLiteOpenHelper {
         return cursor.getCount();
     }
 
-    public void deleteChat(ChatTable chat){
+    public void deleteChat(ChatTable chat) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_CHAT, KEY_ID + "=?", new String[]{String.valueOf(chat.getId()) });
+        db.delete(TABLE_CHAT, KEY_ID + "=?", new String[]{String.valueOf(chat.getId())});
     }
 
-    public void deleteNotif(){
+    public void deleteNotif() {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery("DELETE FROM " + TABLE_NOTIF, null);
         cursor.close();
     }
 
-    public void deleteNotif(String post_id){
+    public void deleteNotif(String post_id) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("DELETE FROM " + TABLE_NOTIF + " WHERE " + POST_ID + "='" + post_id + "'");
     }
 
-    public List<ChatTable> getPeronalChats(String name){
+    public List<ChatTable> getPeronalChats(String name) {
         SQLiteDatabase db = this.getReadableDatabase();
         String getQuery = "SELECT * FROM " + TABLE_CHAT + " WHERE " + POST_ID + " = ?";
         Cursor cursor = db.rawQuery(getQuery, new String[]{name});
@@ -142,13 +142,13 @@ public class DBHandler extends SQLiteOpenHelper {
         List<String> remote = new ArrayList<>();
 
         cursor.moveToFirst();
-        while (!cursor.isAfterLast()){
-            int i=0;
-            for (; i<remote.size(); i++){
+        while (!cursor.isAfterLast()) {
+            int i = 0;
+            for (; i < remote.size(); i++) {
                 if (remote.get(i).contentEquals(cursor.getString(3)))
                     break;
             }
-            if (i==remote.size()) {
+            if (i == remote.size()) {
                 chatTables.add(new ChatTable(cursor.getInt(1), cursor.getString(2), cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getString(7)));
                 remote.add(cursor.getString(3));
             }
@@ -158,8 +158,17 @@ public class DBHandler extends SQLiteOpenHelper {
         return chatTables;
     }
 
-    public List<ChatTable> search(String search_string){
+    public List<ChatTable> search(String search_string) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String getQuery = "SELECT * FROM " + TABLE_CHAT + "WHERE " + search_string + " IN " + MESSAGE;
+        String getQuery = "SELECT * FROM " + TABLE_CHAT + "WHERE '" + search_string + "' IN " + MESSAGE;
+        Cursor cursor = db.rawQuery(getQuery, null);
+
+        List<ChatTable> chatTables = new ArrayList<>();
+        cursor.moveToFirst();
+        while (!cursor.moveToLast()) {
+            chatTables.add(new ChatTable(cursor.getInt(1), cursor.getString(2), cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getString(7)));
+        }
+        cursor.close();
+        return chatTables;
     }
 }

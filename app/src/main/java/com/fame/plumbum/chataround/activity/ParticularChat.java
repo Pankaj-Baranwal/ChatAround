@@ -21,7 +21,6 @@ import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
@@ -30,6 +29,7 @@ import com.fame.plumbum.chataround.R;
 import com.fame.plumbum.chataround.adapters.Chat_adapter;
 import com.fame.plumbum.chataround.database.ChatTable;
 import com.fame.plumbum.chataround.database.DBHandler;
+import com.fame.plumbum.chataround.utils.Constants;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -138,9 +138,7 @@ public class ParticularChat extends AppCompatActivity implements SwipeRefreshLay
 
     private String getImage(String uid, final boolean local, final CircleImageView user_img) {
         final String[] image_name = new String[1];
-        MySingleton.getInstance(getApplicationContext()).
-                getRequestQueue();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://52.66.45.251/ImageName?UserId=" + uid,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, Constants.BASE_URL_DEFAULT + "ImageName?UserId=" + uid,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -161,17 +159,16 @@ public class ParticularChat extends AppCompatActivity implements SwipeRefreshLay
                 Toast.makeText(ParticularChat.this, "Error receiving data!", Toast.LENGTH_SHORT).show();
             }
         });
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        MySingleton.getInstance(ParticularChat.this).addToRequestQueue(stringRequest);
+        MySingleton.getInstance().addToRequestQueue(stringRequest);
         return image_name[0];
     }
 
     private void picassoGlobal(String s, CircleImageView user_img) {
-        Picasso.with(this).load("http://52.66.45.251/ImageReturn?ImageName="+s).resize(256,256).error(R.drawable.user).into(user_img);
+        Picasso.with(this).load(Constants.BASE_URL_DEFAULT + "ImageReturn?ImageName="+s).resize(256,256).error(R.drawable.user).into(user_img);
     }
 
     private void picassoLocal(String s, CircleImageView user_img) {
-        Picasso.with(this).load("http://52.66.45.251/ImageReturn?ImageName="+s).resize(256,256).error(R.drawable.user).into(user_img);
+        Picasso.with(this).load(Constants.BASE_URL_DEFAULT + "ImageReturn?ImageName="+s).resize(256,256).error(R.drawable.user).into(user_img);
     }
 
     private void refreshUpdate(){
@@ -203,13 +200,11 @@ public class ParticularChat extends AppCompatActivity implements SwipeRefreshLay
     }
 
     private void sendChat(final String message){
-        RequestQueue queue = MySingleton.getInstance(getApplicationContext()).
-                getRequestQueue();
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         //SimpleDateFormat sdf = new SimpleDateFormat("MMM dd");
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy");
         time_created = sdf.format(new Date());
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://52.66.45.251/SendMessage?SenderId="+sp.getString("uid", null)+"&ReceiverId="+uid_r+"&SenderName="+sp.getString("user_name", null).replace(" ", "%20")+"&Message="+message.replace(" ", "%20")+"&CreatedAt=" + sdf.format(new Date()).replace(" ", "%20") + "&epochTime=" + sdf.format(new Date()).replace(" ", "%20") +"&PostId="+post_id,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, Constants.BASE_URL_DEFAULT + "SendMessage?SenderId="+sp.getString("uid", null)+"&ReceiverId="+uid_r+"&SenderName="+sp.getString("user_name", null).replace(" ", "%20")+"&Message="+message.replace(" ", "%20")+"&CreatedAt=" + sdf.format(new Date()).replace(" ", "%20") + "&epochTime=" + sdf.format(new Date()).replace(" ", "%20") +"&PostId="+post_id,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -226,7 +221,7 @@ public class ParticularChat extends AppCompatActivity implements SwipeRefreshLay
             }
         });
         stringRequest.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        MySingleton.getInstance(ParticularChat.this).addToRequestQueue(stringRequest);
+        MySingleton.getInstance().addToRequestQueue(stringRequest);
     }
 
     private void getDetails(String message) {

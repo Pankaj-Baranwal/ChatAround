@@ -27,7 +27,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -40,6 +39,7 @@ import com.fame.plumbum.chataround.database.DBHandler;
 import com.fame.plumbum.chataround.database.NotifTable;
 import com.fame.plumbum.chataround.models.ImageSendData;
 import com.fame.plumbum.chataround.queries.ServerAPI;
+import com.fame.plumbum.chataround.utils.Constants;
 import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -153,9 +153,7 @@ public class MyProfile extends Fragment implements SwipeRefreshLayout.OnRefreshL
 
     private void getImage() {
         final String[] image_name = new String[1];
-        MySingleton.getInstance(getContext().getApplicationContext()).
-                getRequestQueue();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://52.66.45.251/ImageName?UserId=" + sharedPreferences.getString("uid", "578b119a7c4ec26dcab64a21"),
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, Constants.BASE_URL_DEFAULT + "ImageName?UserId=" + sharedPreferences.getString("uid", "578b119a7c4ec26dcab64a21"),
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -163,7 +161,7 @@ public class MyProfile extends Fragment implements SwipeRefreshLayout.OnRefreshL
                             JSONObject json = new JSONObject(response);
                             if (!response.contains("Profile Image")) {
                                 image_name[0] = json.getString("ImageName");
-                                Picasso.with(getContext()).load("http://52.66.45.251/ImageReturn?ImageName=" + image_name[0])
+                                Picasso.with(getContext()).load(Constants.BASE_URL_DEFAULT + "ImageReturn?ImageName=" + image_name[0])
                                         .resize(512, 512).error(R.drawable.user).into(user_image);
                             }
                         } catch (JSONException e) {
@@ -176,8 +174,7 @@ public class MyProfile extends Fragment implements SwipeRefreshLayout.OnRefreshL
                 Toast.makeText(getContext(), "Error receiving data!", Toast.LENGTH_SHORT).show();
             }
         });
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        MySingleton.getInstance(getContext()).addToRequestQueue(stringRequest);
+        MySingleton.getInstance().addToRequestQueue(stringRequest);
     }
 
     //3. How To Upload

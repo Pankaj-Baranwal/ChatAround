@@ -28,18 +28,17 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.facebook.appevents.AppEventsLogger;
 import com.fame.plumbum.chataround.LocationService;
+import com.fame.plumbum.chataround.MySingleton;
 import com.fame.plumbum.chataround.R;
 import com.fame.plumbum.chataround.models.ImageSendData;
 import com.fame.plumbum.chataround.queries.ServerAPI;
+import com.fame.plumbum.chataround.utils.Constants;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -209,7 +208,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     else {
                         rl_progress.setVisibility(View.VISIBLE);
                         registerUser();
-                        registerUserDBMS();
                     }
                 }
             });
@@ -247,15 +245,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void getDetails() {
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        startActivity(intent);
-        finish();
+        registerUserDBMS();
     }
 
 
     private void receiveData() {
         StringRequest myReq = new StringRequest(Request.Method.POST,
-                "http://52.66.45.251/GetProfile",
+                Constants.BASE_URL_DEFAULT + "GetProfile",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -290,13 +286,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 return params;
             };
         };
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(myReq);
+        MySingleton.getInstance().addToRequestQueue(myReq);
     }
 
     void registerUser(){
         StringRequest myReq = new StringRequest(Request.Method.POST,
-                "http://52.66.45.251/AuthenticateUser",
+                Constants.BASE_URL_DEFAULT + "AuthenticateUser",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -311,6 +306,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                     editor.apply();
                                     receiveData();
                                 }
+                                editor.apply();
                                 rl_progress.setVisibility(View.GONE);
                             }else if(jO.getString("Status").contentEquals("404")){
                                 rl_progress.setVisibility(View.GONE);
@@ -338,35 +334,29 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 return params;
             }
         };
-        myReq.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(myReq);
+        MySingleton.getInstance().addToRequestQueue(myReq);
     }
 
     void registerUserDBMS(){
         StringRequest myReq = new StringRequest(Request.Method.POST,
-                "http://52.66.45.251/AuthenticateUser",
+                Constants.BASE_URL_DBMS + "login",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         try {
                             rl_progress.setVisibility(View.GONE);
                             JSONObject jO = new JSONObject(response);
-                            if (jO.getString("Status").contentEquals("200")){
+                            if (jO.getString("token")!=null){
                                 SharedPreferences.Editor editor = sp.edit();
-                                editor.putString("uid", jO.getString("UserId"));
-                                if (jO.getString("ProfileFlag").contentEquals("1")) {
-                                    editor.putString("edited", "1");
-                                    editor.apply();
-                                    receiveData();
-                                }
+                                editor.putString("token_animesh", jO.getString("token"));
+                                editor.apply();
+                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivity(intent);
+                                finish();
                                 rl_progress.setVisibility(View.GONE);
-                            }else if(jO.getString("Status").contentEquals("404")){
-                                rl_progress.setVisibility(View.GONE);
-                                Toast.makeText(LoginActivity.this, "Null Entries Sent", Toast.LENGTH_SHORT).show();
                             }else{
                                 rl_progress.setVisibility(View.GONE);
-                                Toast.makeText(LoginActivity.this, "User doesn't exists!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginActivity.this, "User not found!", Toast.LENGTH_SHORT).show();
                             }
                         } catch (JSONException e) {
                             rl_progress.setVisibility(View.GONE);
@@ -382,20 +372,18 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 }) {
             protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("Email", email.replace(" ", "%20"));
-                params.put("Password", password.replace(" ", "%20"));
+                params.put("email", email.replace(" ", "%20"));
+                params.put("password", password.replace(" ", "%20"));
                 return params;
             }
         };
-        myReq.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(myReq);
+        MySingleton.getInstance().addToRequestQueue(myReq);
     }
 
 
     void registerUserWithFb(){
         StringRequest myReq = new StringRequest(Request.Method.POST,
-                "http://52.66.45.251/CreateUser",
+                Constants.BASE_URL_DEFAULT + "CreateUser",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -443,8 +431,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 return params;
             };
         };
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(myReq);
+        MySingleton.getInstance().addToRequestQueue(myReq);
     }
 
 
@@ -515,7 +502,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private void sendDataWithPhoto(final String email, final String password, final String loginFlag) {
         StringRequest myReq = new StringRequest(Request.Method.POST,
-                "http://52.66.45.251/CreateUser",
+                Constants.BASE_URL_DEFAULT + "CreateUser",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -564,9 +551,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 return params;
             }
         };
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(myReq);
-
+        MySingleton.getInstance().addToRequestQueue(myReq);
     }
 
 

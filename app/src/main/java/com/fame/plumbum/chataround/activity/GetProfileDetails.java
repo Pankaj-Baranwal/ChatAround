@@ -11,14 +11,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import com.fame.plumbum.chataround.MySingleton;
 import com.fame.plumbum.chataround.R;
+import com.fame.plumbum.chataround.utils.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +29,8 @@ import java.util.Map;
  * Created by pankaj on 19/8/16.
  */
 public class GetProfileDetails extends AppCompatActivity {
+    static String email_id;
+    static String password;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -37,6 +38,8 @@ public class GetProfileDetails extends AppCompatActivity {
         setContentView(R.layout.dialog_edit);
         final EditText name_edit = (EditText) findViewById(R.id.name);
         final EditText phone_edit = (EditText) findViewById(R.id.phone);
+        final EditText id_edit = (EditText) findViewById(R.id.college_id);
+        final EditText dob_edit = (EditText) findViewById(R.id.dob);
 
         Button update = (Button) findViewById(R.id.update);
         assert update != null;
@@ -47,11 +50,46 @@ public class GetProfileDetails extends AppCompatActivity {
                     String name = name_edit.getText().toString();
                     name = convertToUpperCase(name);
                     String phone = phone_edit.getText().toString();
-                    sendData(name, phone);
+                    sendDataToAnimesh(name, phone, id_edit.getText().toString(), dob_edit.getText().toString());
                 } else
                     Toast.makeText(GetProfileDetails.this, "Invalid Entries!", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void sendDataToAnimesh(final String name, final String phone, final String s, final String s1) {
+        StringRequest myReq = new StringRequest(Request.Method.POST,
+                "http://dbms.pe.hu/public/api/register",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        sendData(name, phone);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(GetProfileDetails.this, "Something went wrong", Toast.LENGTH_SHORT).show();
+                    }
+                }) {
+            protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(GetProfileDetails.this);
+                params.put("name", name);
+                params.put("email", email_id);
+                params.put("password", password);
+                params.put("phone", phone);
+                params.put("college_id", s);
+                params.put("dob", s1);
+                return params;
+            }
+        };
+        MySingleton.getInstance().addToRequestQueue(myReq);
+    }
+
+    private static void animeshDetails(String email, String password){
+        email_id = email;
+        GetProfileDetails.password = password;
     }
 
     private String convertToUpperCase(String name) {
@@ -76,7 +114,7 @@ public class GetProfileDetails extends AppCompatActivity {
 
     private void sendData(final String name, final String phone) {
         StringRequest myReq = new StringRequest(Request.Method.POST,
-                "http://52.66.45.251/AddProfile",
+                Constants.BASE_URL_DEFAULT + "AddProfile",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -115,11 +153,9 @@ public class GetProfileDetails extends AppCompatActivity {
                 params.put("Name", name);
                 params.put("IsEditing", "0");
                 return params;
-            };
+            }
         };
-        myReq.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        RequestQueue requestQueue = Volley.newRequestQueue(GetProfileDetails.this);
-        requestQueue.add(myReq);
+        MySingleton.getInstance().addToRequestQueue(myReq);
     }
 
     @Override

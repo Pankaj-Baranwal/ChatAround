@@ -18,7 +18,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -27,6 +26,7 @@ import com.fame.plumbum.chataround.MySingleton;
 import com.fame.plumbum.chataround.R;
 import com.fame.plumbum.chataround.adapters.Comments_adapter;
 import com.fame.plumbum.chataround.database.DBHandler;
+import com.fame.plumbum.chataround.utils.Constants;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -85,9 +85,7 @@ public class ParticularPost extends AppCompatActivity implements View.OnClickLis
                 }
                 break;
             case R.id.like_button:
-                MySingleton.getInstance(getApplicationContext()).
-                        getRequestQueue();
-                StringRequest stringRequest = new StringRequest(Request.Method.GET,"http://52.66.45.251/Like?UserId="+uid+"&PostId="+post_id+"&UserName="+user_name.replace(" ", "%20")+"&Latitude="+lat+"&Longitude="+lng,
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, Constants.BASE_URL_DEFAULT + "Like?UserId="+uid+"&PostId="+post_id+"&UserName="+user_name.replace(" ", "%20")+"&Latitude="+lat+"&Longitude="+lng,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
@@ -107,16 +105,13 @@ public class ParticularPost extends AppCompatActivity implements View.OnClickLis
                         Toast.makeText(ParticularPost.this, "Error sending data!", Toast.LENGTH_SHORT).show();
                     }
                 });
-                stringRequest.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                MySingleton.getInstance(ParticularPost.this).addToRequestQueue(stringRequest);
+                MySingleton.getInstance().addToRequestQueue(stringRequest);
                 break;
         }
     }
 
     private void sendComment(String s) {
-        MySingleton.getInstance(getApplicationContext()).
-                getRequestQueue();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET,"http://52.66.45.251/Comment?UserId="+uid+"&PostId="+post_id+"&UserName="+user_name.replace(" ", "%20")+"&Comment="+s.replace(" ", "%20")+"&Latitude="+lat+"&Longitude="+lng,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET,Constants.BASE_URL_DEFAULT + "Comment?UserId="+uid+"&PostId="+post_id+"&UserName="+user_name.replace(" ", "%20")+"&Comment="+s.replace(" ", "%20")+"&Latitude="+lat+"&Longitude="+lng,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -134,14 +129,11 @@ public class ParticularPost extends AppCompatActivity implements View.OnClickLis
                 Toast.makeText(ParticularPost.this, "Error sending data!", Toast.LENGTH_SHORT).show();
             }
         });
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        MySingleton.getInstance(ParticularPost.this).addToRequestQueue(stringRequest);
+        MySingleton.getInstance().addToRequestQueue(stringRequest);
     }
 
     private void refresh() {
-        MySingleton.getInstance(getApplicationContext()).
-                getRequestQueue();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET,"http://52.66.45.251/GetPostDetailed?UserId="+uid+"&PostId="+post_id+"&UserName="+user_name.replace(" ", "%20"),
+        StringRequest stringRequest = new StringRequest(Request.Method.GET,Constants.BASE_URL_DEFAULT + "GetPostDetailed?UserId="+uid+"&PostId="+post_id+"&UserName="+user_name.replace(" ", "%20"),
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -158,8 +150,7 @@ public class ParticularPost extends AppCompatActivity implements View.OnClickLis
                 Toast.makeText(ParticularPost.this, "Error sending data!", Toast.LENGTH_SHORT).show();
             }
         });
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        MySingleton.getInstance(ParticularPost.this).addToRequestQueue(stringRequest);
+        MySingleton.getInstance().addToRequestQueue(stringRequest);
     }
 
     private void update() {
@@ -223,9 +214,7 @@ public class ParticularPost extends AppCompatActivity implements View.OnClickLis
 
     private String getImage(String uid, final CircleImageView img_user) {
         final String[] image_name = new String[1];
-        MySingleton.getInstance(getApplicationContext()).
-                getRequestQueue();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://52.66.45.251/ImageName?UserId=" + uid,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, Constants.BASE_URL_DEFAULT + "ImageName?UserId=" + uid,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -243,13 +232,12 @@ public class ParticularPost extends AppCompatActivity implements View.OnClickLis
                 Toast.makeText(ParticularPost.this, "Error receiving data!", Toast.LENGTH_SHORT).show();
             }
         });
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        MySingleton.getInstance(ParticularPost.this).addToRequestQueue(stringRequest);
+        MySingleton.getInstance().addToRequestQueue(stringRequest);
         return image_name[0];
     }
 
     private void picassoLoad(String s, CircleImageView img_user) {
-        Picasso.with(this).load("http://52.66.45.251/ImageReturn?ImageName="+s).error(R.drawable.user).into(img_user);
+        Picasso.with(this).load(Constants.BASE_URL_DEFAULT + "ImageReturn?ImageName="+s).error(R.drawable.user).into(img_user);
     }
 
     public static void getDetails(JSONObject post) {

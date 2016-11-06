@@ -29,7 +29,6 @@ import android.widget.Toast;
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
@@ -37,8 +36,10 @@ import com.fame.plumbum.chataround.MySingleton;
 import com.fame.plumbum.chataround.R;
 import com.fame.plumbum.chataround.fragments.MyProfile;
 import com.fame.plumbum.chataround.fragments.World;
+import com.fame.plumbum.chataround.utils.Constants;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -46,6 +47,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static android.R.attr.data;
+import static com.fame.plumbum.chataround.R.id.rl_progress;
 
 /**
  * Created by pankaj on 4/8/16.
@@ -126,9 +130,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     public void getAllPosts(int counter){
-        RequestQueue queue = MySingleton.getInstance(getApplicationContext()).
-                getRequestQueue();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://52.66.45.251/ShowPost?UserId=" + profile.uid + "&Counter=" + counter + "&Latitude=" + lat + "&Longitude=" + lng,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, Constants.BASE_URL_DEFAULT + "ShowPost?UserId=" + profile.uid + "&Counter=" + counter + "&Latitude=" + lat + "&Longitude=" + lng,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -176,8 +178,39 @@ public class MainActivity extends AppCompatActivity{
                 Toast.makeText(MainActivity.this, "Error receiving data!", Toast.LENGTH_SHORT).show();
             }
         });
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        MySingleton.getInstance(MainActivity.this).addToRequestQueue(stringRequest);
+        MySingleton.getInstance().addToRequestQueue(stringRequest);
+    }
+
+    public void getAllPostsAnimesh(){
+        StringRequest myReq = new StringRequest(Request.Method.POST,
+                Constants.BASE_URL_DBMS + "getpost",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            if (response != null ){
+                                
+                                if (data != null)
+                            }
+                        } catch (JSONException e) {
+
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        rl_progress.setVisibility(View.GONE);
+                        Toast.makeText(LoginActivity.this, "Something went wrong", Toast.LENGTH_SHORT).show();
+                    }
+                }) {
+            protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("token", sp.getString("token_animesh", null));
+                return params;
+            }
+        };
+        MySingleton.getInstance().addToRequestQueue(myReq);
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {
@@ -246,10 +279,8 @@ public class MainActivity extends AppCompatActivity{
                 public void onClick(View v) {
                     String content_txt = content.getText().toString();
                     if (lat != 0 && lng != 0) {
-                        RequestQueue queue = MySingleton.getInstance(MainActivity.this.getApplicationContext()).
-                                getRequestQueue();
                         content_txt = content_txt.replace("\n", "%0A");
-                        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://52.66.45.251/Post?UserId=" + profile.uid + "&UserName=" + profile.name + "&Post=" + content_txt.replace(" ", "%20") + "&Latitude=" + lat + "&Longitude=" + lng,
+                        StringRequest stringRequest = new StringRequest(Request.Method.GET, Constants.BASE_URL_DEFAULT + "Post?UserId=" + profile.uid + "&UserName=" + profile.name + "&Post=" + content_txt.replace(" ", "%20") + "&Latitude=" + lat + "&Longitude=" + lng,
                                 new Response.Listener<String>() {
                                     @Override
                                     public void onResponse(String response) {
@@ -262,7 +293,7 @@ public class MainActivity extends AppCompatActivity{
                             }
                         });
                         stringRequest.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                        MySingleton.getInstance(MainActivity.this).addToRequestQueue(stringRequest);
+                        MySingleton.getInstance().addToRequestQueue(stringRequest);
                     } else {
                         Toast.makeText(MainActivity.this, "Location Error", Toast.LENGTH_SHORT).show();
                     }
@@ -302,9 +333,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void sendFCM(final String uid){
-            RequestQueue queue = MySingleton.getInstance(getApplicationContext()).
-                    getRequestQueue();
-            StringRequest stringRequest = new StringRequest(Request.Method.POST,"http://52.66.45.251/GetFCMToken",
+            StringRequest stringRequest = new StringRequest(Request.Method.POST,Constants.BASE_URL_DEFAULT + "GetFCMToken",
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -324,7 +353,7 @@ public class MainActivity extends AppCompatActivity{
                     return params;
                 }
             };
-            MySingleton.getInstance(MainActivity.this).addToRequestQueue(stringRequest);
+            MySingleton.getInstance().addToRequestQueue(stringRequest);
     }
 
     @Override
