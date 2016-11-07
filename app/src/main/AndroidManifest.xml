@@ -17,7 +17,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:name=".MySingleton">
+        android:name=".utils.MySingleton">
 
         <service
             android:name=".fcm.MyFirebaseMessagingService">
@@ -32,7 +32,7 @@
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
         </service>
-        <service android:name=".LocationService"
+        <service android:name=".utils.LocationService"
             android:enabled="true"
             />
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>

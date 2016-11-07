@@ -31,7 +31,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.fame.plumbum.chataround.MySingleton;
+import com.fame.plumbum.chataround.utils.MySingleton;
 import com.fame.plumbum.chataround.R;
 import com.fame.plumbum.chataround.activity.MainActivity;
 import com.fame.plumbum.chataround.adapters.Notifs;
@@ -69,7 +69,7 @@ public class MyProfile extends Fragment implements SwipeRefreshLayout.OnRefreshL
     Notifs adapter;
     CircleImageView user_image;
     ListView listView;
-    TextView phone_view, name_view;
+    TextView phone_view, name_view, college_view;
 
     JSONArray[] completeListOfPosts;
 
@@ -107,6 +107,7 @@ public class MyProfile extends Fragment implements SwipeRefreshLayout.OnRefreshL
         user_image = (CircleImageView) rootView.findViewById(R.id.image_user);
         name_view = (TextView) rootView.findViewById(R.id.name_user);
         phone_view = (TextView) rootView.findViewById(R.id.phone_user);
+        college_view = (TextView) rootView.findViewById(R.id.college);
 
         mCropImageView = (CropImageView)rootView.findViewById(R.id.cropImageView);
         mCropImageView.setAspectRatio(1, 1);

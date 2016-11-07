@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,9 +16,9 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.fame.plumbum.chataround.MySingleton;
 import com.fame.plumbum.chataround.R;
 import com.fame.plumbum.chataround.utils.Constants;
+import com.fame.plumbum.chataround.utils.MySingleton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,9 +41,10 @@ public class GetProfileDetails extends AppCompatActivity {
         final EditText phone_edit = (EditText) findViewById(R.id.phone);
         final EditText id_edit = (EditText) findViewById(R.id.college_id);
         final EditText dob_edit = (EditText) findViewById(R.id.dob);
-
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(GetProfileDetails.this);
+        email_id = sp.getString("email", "");
+        password = sp.getString("password", "password");
         Button update = (Button) findViewById(R.id.update);
-        assert update != null;
         update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -59,11 +61,25 @@ public class GetProfileDetails extends AppCompatActivity {
 
     private void sendDataToAnimesh(final String name, final String phone, final String s, final String s1) {
         StringRequest myReq = new StringRequest(Request.Method.POST,
-                "http://dbms.pe.hu/public/api/register",
+                Constants.BASE_URL_DBMS + "register",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        sendData(name, phone);
+                        Log.e("Response From animesh", response);
+                        try {
+                            JSONObject jo = new JSONObject(response);
+                            if (jo.has("token")) {
+                                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(GetProfileDetails.this);
+                                SharedPreferences.Editor editor = sp.edit();
+                                editor.putString("token_animesh", jo.getString("token"));
+                                editor.apply();
+                                sendData(name, phone);
+                            }else{
+                                Toast.makeText(GetProfileDetails.this, "User alreadt exists", Toast.LENGTH_SHORT).show();
+                            }
+                        }catch(JSONException e){
+                                e.printStackTrace();
+                            }
                     }
                 },
                 new Response.ErrorListener() {
@@ -74,7 +90,8 @@ public class GetProfileDetails extends AppCompatActivity {
                 }) {
             protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
-                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(GetProfileDetails.this);
+                // SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(GetProfileDetails.this);
+                Log.e("Data", name + " " + email_id + " " + password + " " + phone + " " + s + " " + s1 + " " );
                 params.put("name", name);
                 params.put("email", email_id);
                 params.put("password", password);

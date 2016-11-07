@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -22,13 +23,14 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.fame.plumbum.chataround.MySingleton;
 import com.fame.plumbum.chataround.R;
 import com.fame.plumbum.chataround.adapters.Comments_adapter;
 import com.fame.plumbum.chataround.database.DBHandler;
 import com.fame.plumbum.chataround.utils.Constants;
+import com.fame.plumbum.chataround.utils.MySingleton;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,7 +44,7 @@ public class ParticularPost extends AppCompatActivity implements View.OnClickLis
     TextView post_title, poster_name_txt;
     ImageButton report, chat_button;
     CircleImageView image_user;
-    String post_id = "", uid = "", poster_id = "", user_name="";
+    String post_id = "", uid = "", poster_id = "", user_name="", post_id_dbms = "";
     private static JSONObject postDetails;
     private static Comments_adapter ca;
     private String poster_name;
@@ -110,17 +112,35 @@ public class ParticularPost extends AppCompatActivity implements View.OnClickLis
         }
     }
 
-    private void sendComment(String s) {
+    private void sendComment(final String s) {
         StringRequest stringRequest = new StringRequest(Request.Method.GET,Constants.BASE_URL_DEFAULT + "Comment?UserId="+uid+"&PostId="+post_id+"&UserName="+user_name.replace(" ", "%20")+"&Comment="+s.replace(" ", "%20")+"&Latitude="+lat+"&Longitude="+lng,
                 new Response.Listener<String>() {
                     @Override
-                    public void onResponse(String response) {
-                        rl_progress.setVisibility(View.GONE);
-                        if (response.contains("not in range")){
-                            Toast.makeText(ParticularPost.this, "You are not in range", Toast.LENGTH_SHORT).show();
-                        }else {
-                            refresh();
-                        }
+                    public void onResponse(final String response) {
+                        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ParticularPost.this);
+                        StringRequest sr = new StringRequest(Request.Method.GET, Constants.BASE_URL_DBMS + "comment?token=" + sp.getString("token_animesh", "") + "&content=" + s + "&post_id=" + post_id_dbms + "&ext_id=" + post_id, new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response_1) {
+                                Log.e("Response in Post", response_1);
+                                rl_progress.setVisibility(View.GONE);
+                                if (response.contains("not in range")){
+                                    Toast.makeText(ParticularPost.this, "You are not in range", Toast.LENGTH_SHORT).show();
+                                }else {
+                                    refresh();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                rl_progress.setVisibility(View.GONE);
+                                if (response.contains("not in range")){
+                                    Toast.makeText(ParticularPost.this, "You are not in range", Toast.LENGTH_SHORT).show();
+                                }else {
+                                    refresh();
+                                }
+                            }
+                        });
+                        MySingleton.getInstance().addToRequestQueue(sr);
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -246,6 +266,27 @@ public class ParticularPost extends AppCompatActivity implements View.OnClickLis
 
     private void init(){
         post_id = getIntent().getExtras().getString("post_id");
+        StringRequest sr = new StringRequest(Request.Method.GET, Constants.BASE_URL_DBMS + "getpost?token" + PreferenceManager.getDefaultSharedPreferences(ParticularPost.this).getString("token_animesh", ""), new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONArray data = new JSONObject(response).getJSONArray("data");
+                    for (int i=0;i < data.length(); i++){
+                        if (data.getJSONObject(i).getString("ext_id").contentEquals(post_id)){
+                            post_id_dbms = data.getJSONObject(i).getString("id");
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        MySingleton.getInstance().addToRequestQueue(sr);
         rl_progress = (RelativeLayout) findViewById(R.id.rl_progress);
         comments_list = (ListView) findViewById(R.id.list_comments_post);
         image_user = (CircleImageView) findViewById(R.id.image_user);

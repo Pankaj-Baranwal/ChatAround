@@ -21,6 +21,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -33,8 +34,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.facebook.appevents.AppEventsLogger;
-import com.fame.plumbum.chataround.LocationService;
-import com.fame.plumbum.chataround.MySingleton;
+import com.fame.plumbum.chataround.utils.LocationService;
+import com.fame.plumbum.chataround.utils.MySingleton;
 import com.fame.plumbum.chataround.R;
 import com.fame.plumbum.chataround.models.ImageSendData;
 import com.fame.plumbum.chataround.queries.ServerAPI;
@@ -343,6 +344,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        Log.e("Response in Login", response);
                         try {
                             rl_progress.setVisibility(View.GONE);
                             JSONObject jO = new JSONObject(response);

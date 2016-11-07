@@ -57,6 +57,10 @@ public class SignUp extends AppCompatActivity{
                     else if (password.length() < 5)
                         Toast.makeText(SignUp.this, "Password too short", Toast.LENGTH_SHORT).show();
                     else if (email.indexOf("@")>1 && email.indexOf(".", email.indexOf("@"))>email.indexOf("@") && email.indexOf("@", email.indexOf("@"))>0){
+                        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(SignUp.this);
+                        SharedPreferences.Editor editor = sp.edit();
+                        editor.putString("email", email);
+                        editor.putString("password", password);
                         registerUser();
                     }else
                         Toast.makeText(SignUp.this, "Invalid Email ID", Toast.LENGTH_SHORT).show();

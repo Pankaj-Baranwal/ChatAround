@@ -17,6 +17,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,19 +28,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.fame.plumbum.chataround.MySingleton;
 import com.fame.plumbum.chataround.R;
 import com.fame.plumbum.chataround.fragments.MyProfile;
 import com.fame.plumbum.chataround.fragments.World;
 import com.fame.plumbum.chataround.utils.Constants;
+import com.fame.plumbum.chataround.utils.MySingleton;
 import com.google.firebase.iid.FirebaseInstanceId;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,9 +46,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static android.R.attr.data;
-import static com.fame.plumbum.chataround.R.id.rl_progress;
 
 /**
  * Created by pankaj on 4/8/16.
@@ -63,6 +59,8 @@ public class MainActivity extends AppCompatActivity{
     SharedPreferences sp;
     public int count = 0;
     String token;
+    // 11-07 04:36:24.843 9484-9484/com.fame.plumbum.chataround E/response: {"Status": 200, "Message": "Posted", "PostId": "581fb7047c4ec2677d237669"}
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -181,38 +179,6 @@ public class MainActivity extends AppCompatActivity{
         MySingleton.getInstance().addToRequestQueue(stringRequest);
     }
 
-    public void getAllPostsAnimesh(){
-        StringRequest myReq = new StringRequest(Request.Method.POST,
-                Constants.BASE_URL_DBMS + "getpost",
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            if (response != null ){
-                                
-                                if (data != null)
-                            }
-                        } catch (JSONException e) {
-
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        rl_progress.setVisibility(View.GONE);
-                        Toast.makeText(LoginActivity.this, "Something went wrong", Toast.LENGTH_SHORT).show();
-                    }
-                }) {
-            protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("token", sp.getString("token_animesh", null));
-                return params;
-            }
-        };
-        MySingleton.getInstance().addToRequestQueue(myReq);
-    }
-
     class ViewPagerAdapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();
         private final List<String> mFragmentTitleList = new ArrayList<>();
@@ -280,11 +246,31 @@ public class MainActivity extends AppCompatActivity{
                     String content_txt = content.getText().toString();
                     if (lat != 0 && lng != 0) {
                         content_txt = content_txt.replace("\n", "%0A");
+                        final String finalContent_txt = content_txt;
                         StringRequest stringRequest = new StringRequest(Request.Method.GET, Constants.BASE_URL_DEFAULT + "Post?UserId=" + profile.uid + "&UserName=" + profile.name + "&Post=" + content_txt.replace(" ", "%20") + "&Latitude=" + lat + "&Longitude=" + lng,
                                 new Response.Listener<String>() {
                                     @Override
                                     public void onResponse(String response) {
-                                        needSomethingTweet = true;
+                                        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                                        Log.e("MainActiv", response);
+                                        try {
+                                            Log.e("token", Constants.BASE_URL_DBMS + "post?token=" + sp.getString("token_animesh", "") + "&content=" + finalContent_txt.replace(" ", "%20") + "&ext_id=" + new JSONObject(response).getString("PostId"));
+                                            StringRequest sr = new StringRequest(Request.Method.GET, Constants.BASE_URL_DBMS + "post?token" + sp.getString("token_animesh", "") + "&content=" + finalContent_txt.replace(" ", "%20") + "&ext_id=" + new JSONObject(response).getString("PostId"), new Response.Listener<String>() {
+                                                @Override
+                                                public void onResponse(String response) {
+                                                    needSomethingWorld = true;
+                                                }
+                                            }, new Response.ErrorListener() {
+                                                @Override
+                                                public void onErrorResponse(VolleyError error) {
+                                                    needSomethingWorld = true;
+                                                }
+                                            });
+                                            MySingleton.getInstance().addToRequestQueue(sr);
+                                        } catch (JSONException e) {
+                                            Log.e("Error MA Anim", e.toString());
+                                            e.printStackTrace();
+                                        }
                                     }
                                 }, new Response.ErrorListener() {
                             @Override
@@ -292,7 +278,6 @@ public class MainActivity extends AppCompatActivity{
                                 Toast.makeText(MainActivity.this, "Error sending data!", Toast.LENGTH_SHORT).show();
                             }
                         });
-                        stringRequest.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                         MySingleton.getInstance().addToRequestQueue(stringRequest);
                     } else {
                         Toast.makeText(MainActivity.this, "Location Error", Toast.LENGTH_SHORT).show();
@@ -365,3 +350,39 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 }
+
+
+/*
+public void getAllPostsAnimesh(){
+        StringRequest myReq = new StringRequest(Request.Method.POST,
+                Constants.BASE_URL_DBMS + "getpost",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            if (response != null ){
+                                JSONObject jo = new JSONObject(response);
+                                if (jo.has("data")) {
+                                    JSONArray ja = jo.getJSONArray("data");
+                                }
+                            }
+                        } catch (JSONException e) {
+
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }) {
+            protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("token", sp.getString("token_animesh", null));
+                return params;
+            }
+        };
+        MySingleton.getInstance().addToRequestQueue(myReq);
+    }
+ */

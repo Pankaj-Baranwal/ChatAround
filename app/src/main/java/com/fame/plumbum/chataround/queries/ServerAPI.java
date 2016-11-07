@@ -2,6 +2,7 @@ package com.fame.plumbum.chataround.queries;
 
 import com.fame.plumbum.chataround.models.ImageSendData;
 import com.fame.plumbum.chataround.models.PostData;
+import com.fame.plumbum.chataround.utils.Constants;
 import com.google.gson.Gson;
 
 import java.util.concurrent.TimeUnit;
