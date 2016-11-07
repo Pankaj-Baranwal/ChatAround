@@ -1,6 +1,6 @@
-package com.fame.plumbum.chataround;
+package com.fame.plumbum.chataround.utils;
 
-import android.app.Application;
+import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -11,7 +11,7 @@ import com.android.volley.toolbox.Volley;
 /**
  * Created by pankaj on 24/7/16.
  */
-public class MySingleton extends Application{
+public class MySingleton extends MultiDexApplication {
 
     public static final String TAG = MySingleton.class.getSimpleName();
     private static MySingleton mInstance;
