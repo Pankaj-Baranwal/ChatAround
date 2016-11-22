@@ -11,14 +11,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.fame.plumbum.chataround.MySingleton;
+import com.fame.plumbum.chataround.utils.MySingleton;
 import com.fame.plumbum.chataround.R;
+import com.fame.plumbum.chataround.utils.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,9 +46,7 @@ public class OTP extends AppCompatActivity {
     }
 
     private void sendOTP(String s, String uid) {
-        RequestQueue queue = MySingleton.getInstance(getApplicationContext()).
-                getRequestQueue();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://52.66.45.251/NumberVerify?UserId=" + uid + "&OTP="+s,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, Constants.BASE_URL_DEFAULT + "NumberVerify?UserId=" + uid + "&OTP="+s,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -77,8 +74,7 @@ public class OTP extends AppCompatActivity {
                 Toast.makeText(OTP.this, "Error receiving data!", Toast.LENGTH_SHORT).show();
             }
         });
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        MySingleton.getInstance(OTP.this).addToRequestQueue(stringRequest);
+        MySingleton.getInstance().addToRequestQueue(stringRequest);
     }
 
     @Override

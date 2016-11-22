@@ -19,6 +19,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.fame.plumbum.chataround.R;
+import com.fame.plumbum.chataround.utils.Constants;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
@@ -34,6 +35,7 @@ import java.util.Map;
 public class SignUp extends AppCompatActivity{
     EditText pass_edit, email_edit;
     String password, email, loginFlag = "0";
+
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     @Override
@@ -55,6 +57,10 @@ public class SignUp extends AppCompatActivity{
                     else if (password.length() < 5)
                         Toast.makeText(SignUp.this, "Password too short", Toast.LENGTH_SHORT).show();
                     else if (email.indexOf("@")>1 && email.indexOf(".", email.indexOf("@"))>email.indexOf("@") && email.indexOf("@", email.indexOf("@"))>0){
+                        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(SignUp.this);
+                        SharedPreferences.Editor editor = sp.edit();
+                        editor.putString("email", email);
+                        editor.putString("password", password);
                         registerUser();
                     }else
                         Toast.makeText(SignUp.this, "Invalid Email ID", Toast.LENGTH_SHORT).show();
@@ -88,7 +94,7 @@ public class SignUp extends AppCompatActivity{
 
     void registerUser(){
         StringRequest myReq = new StringRequest(Request.Method.POST,
-                "http://52.66.45.251/CreateUser",
+                Constants.BASE_URL_DEFAULT + "CreateUser",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -121,6 +127,7 @@ public class SignUp extends AppCompatActivity{
                 params.put("Email", email.replace(" ", "%20"));
                 params.put("Password", password.replace(" ", "%20"));
                 params.put("LoginFlag", loginFlag);
+
                 return params;
             };
         };

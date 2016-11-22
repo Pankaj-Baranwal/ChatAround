@@ -1,4 +1,4 @@
-package com.fame.plumbum.chataround;
+package com.fame.plumbum.chataround.utils;
 
 import android.Manifest;
 import android.app.Service;

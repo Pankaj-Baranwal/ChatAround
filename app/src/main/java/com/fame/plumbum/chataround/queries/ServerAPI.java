@@ -2,6 +2,7 @@ package com.fame.plumbum.chataround.queries;
 
 import com.fame.plumbum.chataround.models.ImageSendData;
 import com.fame.plumbum.chataround.models.PostData;
+import com.fame.plumbum.chataround.utils.Constants;
 import com.google.gson.Gson;
 
 import java.util.concurrent.TimeUnit;
@@ -48,7 +49,7 @@ public interface ServerAPI {
 // And in client, just create a new client instead of using the above one. That is just for loggnig purposes.            
     Retrofit retrofit =
             new Retrofit.Builder()
-                    .baseUrl("http://52.66.45.251/") // REMEMBER TO END with /
+                    .baseUrl(Constants.BASE_URL_DEFAULT + "") // REMEMBER TO END with /
                     .addConverterFactory(GsonConverterFactory.create(new Gson()))
                     .client(httpClient.build())
                     .build();

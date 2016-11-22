@@ -13,15 +13,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.fame.plumbum.chataround.MySingleton;
+import com.fame.plumbum.chataround.utils.MySingleton;
 import com.fame.plumbum.chataround.R;
 import com.fame.plumbum.chataround.activity.ParticularChat;
 import com.fame.plumbum.chataround.database.ChatTable;
+import com.fame.plumbum.chataround.utils.Constants;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -116,9 +116,7 @@ public class Chat_personal_adapter extends BaseAdapter {
 
     private String getImage(String uid, final boolean local, final CircleImageView user_img) {
         final String[] image_name = new String[1];
-        MySingleton.getInstance(context.getApplicationContext()).
-                getRequestQueue();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://52.66.45.251/ImageName?UserId=" + uid,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, Constants.BASE_URL_DEFAULT + "ImageName?UserId=" + uid,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -139,17 +137,16 @@ public class Chat_personal_adapter extends BaseAdapter {
                 Toast.makeText(context, "Error receiving data!", Toast.LENGTH_SHORT).show();
             }
         });
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        MySingleton.getInstance(context).addToRequestQueue(stringRequest);
+        MySingleton.getInstance().addToRequestQueue(stringRequest);
         return image_name[0];
     }
 
     private void picassoGlobal(String s, CircleImageView user_img) {
-        Picasso.with(context).load("http://52.66.45.251/ImageReturn?ImageName=" + s).error(R.drawable.user).into(user_img);
+        Picasso.with(context).load(Constants.BASE_URL_DEFAULT + "ImageReturn?ImageName=" + s).error(R.drawable.user).into(user_img);
     }
 
     private void picassoLocal(String s, CircleImageView user_img) {
-        Picasso.with(context).load("http://52.66.45.251/ImageReturn?ImageName=" + s).error(R.drawable.user).into(user_img);
+        Picasso.with(context).load(Constants.BASE_URL_DEFAULT + "ImageReturn?ImageName=" + s).error(R.drawable.user).into(user_img);
     }
 
     private String toProperCase(String name) {

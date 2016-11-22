@@ -6,19 +6,19 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.fame.plumbum.chataround.R;
+import com.fame.plumbum.chataround.utils.Constants;
+import com.fame.plumbum.chataround.utils.MySingleton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +30,8 @@ import java.util.Map;
  * Created by pankaj on 19/8/16.
  */
 public class GetProfileDetails extends AppCompatActivity {
+    static String email_id;
+    static String password;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -37,9 +39,12 @@ public class GetProfileDetails extends AppCompatActivity {
         setContentView(R.layout.dialog_edit);
         final EditText name_edit = (EditText) findViewById(R.id.name);
         final EditText phone_edit = (EditText) findViewById(R.id.phone);
-
+        final EditText id_edit = (EditText) findViewById(R.id.college_id);
+        final EditText dob_edit = (EditText) findViewById(R.id.dob);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(GetProfileDetails.this);
+        email_id = sp.getString("email", "");
+        password = sp.getString("password", "password");
         Button update = (Button) findViewById(R.id.update);
-        assert update != null;
         update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -47,11 +52,61 @@ public class GetProfileDetails extends AppCompatActivity {
                     String name = name_edit.getText().toString();
                     name = convertToUpperCase(name);
                     String phone = phone_edit.getText().toString();
-                    sendData(name, phone);
+                    sendDataToAnimesh(name, phone, id_edit.getText().toString(), dob_edit.getText().toString());
                 } else
                     Toast.makeText(GetProfileDetails.this, "Invalid Entries!", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void sendDataToAnimesh(final String name, final String phone, final String s, final String s1) {
+        StringRequest myReq = new StringRequest(Request.Method.POST,
+                Constants.BASE_URL_DBMS + "register",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.e("Response From animesh", response);
+                        try {
+                            JSONObject jo = new JSONObject(response);
+                            if (jo.has("token")) {
+                                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(GetProfileDetails.this);
+                                SharedPreferences.Editor editor = sp.edit();
+                                editor.putString("token_animesh", jo.getString("token"));
+                                editor.apply();
+                                sendData(name, phone);
+                            }else{
+                                Toast.makeText(GetProfileDetails.this, "User alreadt exists", Toast.LENGTH_SHORT).show();
+                            }
+                        }catch(JSONException e){
+                                e.printStackTrace();
+                            }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(GetProfileDetails.this, "Something went wrong", Toast.LENGTH_SHORT).show();
+                    }
+                }) {
+            protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                // SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(GetProfileDetails.this);
+                Log.e("Data", name + " " + email_id + " " + password + " " + phone + " " + s + " " + s1 + " " );
+                params.put("name", name);
+                params.put("email", email_id);
+                params.put("password", password);
+                params.put("phone", phone);
+                params.put("college_id", s);
+                params.put("dob", s1);
+                return params;
+            }
+        };
+        MySingleton.getInstance().addToRequestQueue(myReq);
+    }
+
+    private static void animeshDetails(String email, String password){
+        email_id = email;
+        GetProfileDetails.password = password;
     }
 
     private String convertToUpperCase(String name) {
@@ -76,7 +131,7 @@ public class GetProfileDetails extends AppCompatActivity {
 
     private void sendData(final String name, final String phone) {
         StringRequest myReq = new StringRequest(Request.Method.POST,
-                "http://52.66.45.251/AddProfile",
+                Constants.BASE_URL_DEFAULT + "AddProfile",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -115,11 +170,9 @@ public class GetProfileDetails extends AppCompatActivity {
                 params.put("Name", name);
                 params.put("IsEditing", "0");
                 return params;
-            };
+            }
         };
-        myReq.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        RequestQueue requestQueue = Volley.newRequestQueue(GetProfileDetails.this);
-        requestQueue.add(myReq);
+        MySingleton.getInstance().addToRequestQueue(myReq);
     }
 
     @Override
