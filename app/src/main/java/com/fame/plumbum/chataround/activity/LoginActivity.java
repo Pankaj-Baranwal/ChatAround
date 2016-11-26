@@ -21,7 +21,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -34,12 +33,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.facebook.appevents.AppEventsLogger;
-import com.fame.plumbum.chataround.utils.LocationService;
-import com.fame.plumbum.chataround.utils.MySingleton;
 import com.fame.plumbum.chataround.R;
 import com.fame.plumbum.chataround.models.ImageSendData;
 import com.fame.plumbum.chataround.queries.ServerAPI;
 import com.fame.plumbum.chataround.utils.Constants;
+import com.fame.plumbum.chataround.utils.LocationService;
+import com.fame.plumbum.chataround.utils.MySingleton;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -246,7 +245,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void getDetails() {
-        registerUserDBMS();
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
 
@@ -332,50 +333,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("Email", email.replace(" ", "%20"));
                 params.put("Password", password.replace(" ", "%20"));
-                return params;
-            }
-        };
-        MySingleton.getInstance().addToRequestQueue(myReq);
-    }
-
-    void registerUserDBMS(){
-        StringRequest myReq = new StringRequest(Request.Method.POST,
-                Constants.BASE_URL_DBMS + "login",
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.e("Response in Login", response);
-                        try {
-                            rl_progress.setVisibility(View.GONE);
-                            JSONObject jO = new JSONObject(response);
-                            if (jO.getString("token")!=null){
-                                SharedPreferences.Editor editor = sp.edit();
-                                editor.putString("token_animesh", jO.getString("token"));
-                                editor.apply();
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                finish();
-                                rl_progress.setVisibility(View.GONE);
-                            }else{
-                                rl_progress.setVisibility(View.GONE);
-                                Toast.makeText(LoginActivity.this, "User not found!", Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            rl_progress.setVisibility(View.GONE);
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        rl_progress.setVisibility(View.GONE);
-                        Toast.makeText(LoginActivity.this, "Something went wrong", Toast.LENGTH_SHORT).show();
-                    }
-                }) {
-            protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("email", email.replace(" ", "%20"));
-                params.put("password", password.replace(" ", "%20"));
                 return params;
             }
         };

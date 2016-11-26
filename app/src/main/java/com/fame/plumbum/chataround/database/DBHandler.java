@@ -157,18 +157,4 @@ public class DBHandler extends SQLiteOpenHelper {
         cursor.close();
         return chatTables;
     }
-
-    public List<ChatTable> search(String search_string) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String getQuery = "SELECT * FROM " + TABLE_CHAT + "WHERE '" + search_string + "' IN " + MESSAGE;
-        Cursor cursor = db.rawQuery(getQuery, null);
-
-        List<ChatTable> chatTables = new ArrayList<>();
-        cursor.moveToFirst();
-        while (!cursor.moveToLast()) {
-            chatTables.add(new ChatTable(cursor.getInt(1), cursor.getString(2), cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getString(7)));
-        }
-        cursor.close();
-        return chatTables;
-    }
 }

@@ -30,83 +30,32 @@ import java.util.Map;
  * Created by pankaj on 19/8/16.
  */
 public class GetProfileDetails extends AppCompatActivity {
-    static String email_id;
-    static String password;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_edit);
+        // Initialising variables
         final EditText name_edit = (EditText) findViewById(R.id.name);
         final EditText phone_edit = (EditText) findViewById(R.id.phone);
-        final EditText id_edit = (EditText) findViewById(R.id.college_id);
-        final EditText dob_edit = (EditText) findViewById(R.id.dob);
+
+        // Local private storage
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(GetProfileDetails.this);
-        email_id = sp.getString("email", "");
-        password = sp.getString("password", "password");
         Button update = (Button) findViewById(R.id.update);
+        // An event listener
         update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Check if all conditions are satisfied for loggin in
                 if (phone_edit.getText().toString().length() > 9 && name_edit.getText().toString().length() != 0) {
                     String name = name_edit.getText().toString();
                     name = convertToUpperCase(name);
                     String phone = phone_edit.getText().toString();
-                    sendDataToAnimesh(name, phone, id_edit.getText().toString(), dob_edit.getText().toString());
+                    sendData(name, phone);
                 } else
                     Toast.makeText(GetProfileDetails.this, "Invalid Entries!", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void sendDataToAnimesh(final String name, final String phone, final String s, final String s1) {
-        StringRequest myReq = new StringRequest(Request.Method.POST,
-                Constants.BASE_URL_DBMS + "register",
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.e("Response From animesh", response);
-                        try {
-                            JSONObject jo = new JSONObject(response);
-                            if (jo.has("token")) {
-                                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(GetProfileDetails.this);
-                                SharedPreferences.Editor editor = sp.edit();
-                                editor.putString("token_animesh", jo.getString("token"));
-                                editor.apply();
-                                sendData(name, phone);
-                            }else{
-                                Toast.makeText(GetProfileDetails.this, "User alreadt exists", Toast.LENGTH_SHORT).show();
-                            }
-                        }catch(JSONException e){
-                                e.printStackTrace();
-                            }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(GetProfileDetails.this, "Something went wrong", Toast.LENGTH_SHORT).show();
-                    }
-                }) {
-            protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                // SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(GetProfileDetails.this);
-                Log.e("Data", name + " " + email_id + " " + password + " " + phone + " " + s + " " + s1 + " " );
-                params.put("name", name);
-                params.put("email", email_id);
-                params.put("password", password);
-                params.put("phone", phone);
-                params.put("college_id", s);
-                params.put("dob", s1);
-                return params;
-            }
-        };
-        MySingleton.getInstance().addToRequestQueue(myReq);
-    }
-
-    private static void animeshDetails(String email, String password){
-        email_id = email;
-        GetProfileDetails.password = password;
     }
 
     private String convertToUpperCase(String name) {
@@ -152,13 +101,17 @@ public class GetProfileDetails extends AppCompatActivity {
                             }else if(jO.getString("Status").contentEquals("400")){
                                 Toast.makeText(GetProfileDetails.this, "Couldnt update entries!", Toast.LENGTH_SHORT).show();
                             }
-                        } catch (JSONException ignored) {
+                        } catch (JSONException e) {
+                            Log.getStackTraceString(e);
+                            e.printStackTrace();
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        Log.getStackTraceString(error);
                         Toast.makeText(GetProfileDetails.this, "Something went wrong", Toast.LENGTH_SHORT).show();
                     }
                 }) {

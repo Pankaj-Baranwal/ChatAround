@@ -17,7 +17,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -252,25 +251,7 @@ public class MainActivity extends AppCompatActivity{
                                     @Override
                                     public void onResponse(String response) {
                                         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                                        Log.e("MainActiv", response);
-                                        try {
-                                            Log.e("token", Constants.BASE_URL_DBMS + "post?token=" + sp.getString("token_animesh", "") + "&content=" + finalContent_txt.replace(" ", "%20") + "&ext_id=" + new JSONObject(response).getString("PostId"));
-                                            StringRequest sr = new StringRequest(Request.Method.GET, Constants.BASE_URL_DBMS + "post?token" + sp.getString("token_animesh", "") + "&content=" + finalContent_txt.replace(" ", "%20") + "&ext_id=" + new JSONObject(response).getString("PostId"), new Response.Listener<String>() {
-                                                @Override
-                                                public void onResponse(String response) {
-                                                    needSomethingWorld = true;
-                                                }
-                                            }, new Response.ErrorListener() {
-                                                @Override
-                                                public void onErrorResponse(VolleyError error) {
-                                                    needSomethingWorld = true;
-                                                }
-                                            });
-                                            MySingleton.getInstance().addToRequestQueue(sr);
-                                        } catch (JSONException e) {
-                                            Log.e("Error MA Anim", e.toString());
-                                            e.printStackTrace();
-                                        }
+                                        needSomethingWorld = true;
                                     }
                                 }, new Response.ErrorListener() {
                             @Override
@@ -350,39 +331,3 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 }
-
-
-/*
-public void getAllPostsAnimesh(){
-        StringRequest myReq = new StringRequest(Request.Method.POST,
-                Constants.BASE_URL_DBMS + "getpost",
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            if (response != null ){
-                                JSONObject jo = new JSONObject(response);
-                                if (jo.has("data")) {
-                                    JSONArray ja = jo.getJSONArray("data");
-                                }
-                            }
-                        } catch (JSONException e) {
-
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                }) {
-            protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("token", sp.getString("token_animesh", null));
-                return params;
-            }
-        };
-        MySingleton.getInstance().addToRequestQueue(myReq);
-    }
- */

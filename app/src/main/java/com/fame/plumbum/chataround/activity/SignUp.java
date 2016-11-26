@@ -11,15 +11,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.fame.plumbum.chataround.R;
 import com.fame.plumbum.chataround.utils.Constants;
+import com.fame.plumbum.chataround.utils.MySingleton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
@@ -61,6 +59,7 @@ public class SignUp extends AppCompatActivity{
                         SharedPreferences.Editor editor = sp.edit();
                         editor.putString("email", email);
                         editor.putString("password", password);
+                        editor.apply();
                         registerUser();
                     }else
                         Toast.makeText(SignUp.this, "Invalid Email ID", Toast.LENGTH_SHORT).show();
@@ -131,9 +130,7 @@ public class SignUp extends AppCompatActivity{
                 return params;
             };
         };
-        myReq.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(myReq);
+        MySingleton.getInstance().addToRequestQueue(myReq);
     }
 
     @Override
